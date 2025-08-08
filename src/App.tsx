@@ -2,7 +2,7 @@ import './App.css';
 import { useEffect } from 'react';
 import { setupEventHandlers } from './api/ui/EventHandlers.js';
 
-function Main() {
+function App() {
 
   useEffect(() => {
     setupEventHandlers();
@@ -17,4 +17,4 @@ function Main() {
   );
 }
 
-export default Main;
+export default App;
