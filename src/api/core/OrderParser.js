@@ -97,7 +97,8 @@ export class OrderParser {
       "Guarana Diversos - 2l",
       "Refrigerante Guaraná Diversos- 1.5 litros",
       "agua",
-      "água"
+      "água",
+      "Kuat 2l"
     ];
 
     for (let i = indexItems + 1; i < endItemsIndex; i++) {
