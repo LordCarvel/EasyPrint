@@ -98,7 +98,8 @@ export class OrderParser {
       "Refrigerante Guaraná Diversos- 1.5 litros",
       "agua",
       "água",
-      "Kuat 2l"
+      "Kuat 2l",
+      "Coca-Cola Lata 350ml"
     ];
 
     for (let i = indexItems + 1; i < endItemsIndex; i++) {
