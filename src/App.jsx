@@ -10,7 +10,7 @@ function App() {
 
   return (
     <div className='container'>
-      <h2>ImpressoraFácil</h2>
+      <h2>Impressão Fácil</h2>
       <textarea id="orderText" placeholder="Cole um pedido aqui..."></textarea>
       <button id="pasteBtn">Colar</button>
     </div>
