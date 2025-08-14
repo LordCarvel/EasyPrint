@@ -11,6 +11,7 @@ export class Order {
     items = [],
     payment = { lines: [], method: "unknown", collectOnDelivery: false },
     notes = "",
+    sodas = [],
   } = {}) {
     this.orderNumber = orderNumber;
     this.custumerName = custumerName;
@@ -29,6 +30,7 @@ export class Order {
     };
 
     this.notes = notes;
+    this.sodas = Array.isArray(sodas) ? [...sodas] : [];
   }
 
   static fromParsed(parsed) {
@@ -68,6 +70,7 @@ export class Order {
       items: [...this.items],
       payment: { ...this.payment },
       notes: this.notes,
+      sodas: [...this.sodas],
     };
   }
 

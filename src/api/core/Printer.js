@@ -1,6 +1,20 @@
 import { Order } from "./Order";
 
 export class Printer {
+  static iframe = null;
+
+  static ensureIframe() {
+    if (!this.iframe) {
+      this.iframe = document.createElement("iframe");
+      this.iframe.style.position = "absolute";
+      this.iframe.style.width = "0";
+      this.iframe.style.height = "0";
+      this.iframe.style.border = "0";
+      document.body.appendChild(this.iframe);
+    }
+    return this.iframe;
+  }
+
   static generateHTML(order) {
     const paymentHTML = order.payment.lines
       .map(line => `<div>${line}</div>`)
@@ -31,7 +45,7 @@ export class Printer {
 
           <div class="section">
             <strong>Horário:</strong><br/>
-            ${order.timeInfo.replace(/\n/g, "<br/>")}
+            ${(order.timeInfo || "").replace(/\n/g, "<br/>")}
           </div>
 
           <div class="section">
@@ -39,18 +53,19 @@ export class Printer {
           </div>
 
           <div class="section">
-            <strong>Localizador:</strong> ${order.locator}
+            <strong>Localizador:</strong> ${order.locator}<br/>
             <strong>Endereço:</strong><br/>
-            ${order.address.replace(/\n/g, "<br/>")}
+            ${(order.address || "").replace(/\n/g, "<br/>")}
           </div>
 
           <div class="section">
             <strong>Entrega:</strong><br/>
-            ${order.deliveryInfo.replace(/\n/g, "<br/>")}
+            ${(order.deliveryInfo || "").replace(/\n/g, "<br/>")}
           </div>
 
           <div class="section">
             <strong>Itens:</strong><br/>
+            ${order.sodas && order.sodas.length > 0 ? `<div><strong>Refrigerantes:</strong></div>${order.sodas.map(s => `<div class="soda-item" style="margin-bottom:6px; border-bottom: 1px dashed #262627ff; margin-left:10px; font-weight: 700;">- ${s}</div>`).join("")}` : ""}
             ${order.items.map(i => `<div>- ${i}</div>`).join("")}
           </div>
 
@@ -65,13 +80,7 @@ export class Printer {
   }
 
   static printHTML(html) {
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "absolute";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    iframe.style.border = "0";
-    document.body.appendChild(iframe);
-
+    const iframe = this.ensureIframe();
     const iframeWindow = iframe.contentWindow;
     if (!iframeWindow) return;
 
@@ -82,12 +91,6 @@ export class Printer {
 
     iframeWindow.focus();
     iframeWindow.print();
-
-    setTimeout(() => {
-      if (iframe.parentNode) {
-        iframe.parentNode.removeChild(iframe);
-      }
-    }, 1000);
   }
 
   static printOrder(order) {

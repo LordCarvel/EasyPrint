@@ -32,7 +32,6 @@ export class OrderParser {
     const indexServiceFee = lines.findIndex((line) => line.includes("Taxa de serviço"));
     const indexSubtotal = lines.findIndex((line) => line.includes("Subtotal"));
 
-    // Bloco de horários
     let timeBlock = [];
     for (let i = indexViaIFood; i < indexItems; i++) {
       if (
@@ -46,7 +45,6 @@ export class OrderParser {
     }
     order.timeInfo = timeBlock.join("\n");
 
-    // Endereço e entrega
     let addressBlock = [];
     let deliveryBlock = [];
     let startedAddress = false;
@@ -74,7 +72,6 @@ export class OrderParser {
     order.address = addressBlock.join("\n");
     order.deliveryInfo = deliveryBlock.join("\n");
 
-    // Itens
     const endItemsIndex = indexServiceFee !== -1 ? indexServiceFee : indexSubtotal;
 
     const highlightKeys = [
@@ -102,18 +99,24 @@ export class OrderParser {
       "Coca-Cola Lata 350ml"
     ];
 
+    const sodas = [];
+    const items = [];
+
     for (let i = indexItems + 1; i < endItemsIndex; i++) {
       let item = lines[i];
       const found = highlightKeys.find((key) =>
         item.toLowerCase().includes(key.toLowerCase())
       );
       if (found) {
-        item = `<strong style="font-size:10pt">${item}</strong>`;
+        sodas.push(item);
+      } else {
+        items.push(item);
       }
-      order.items.push(item);
     }
 
-    // Funções auxiliares
+    order.items = items;
+    order.sodas = sodas;
+
     function boldMoney(line) {
       return line.replace(/(-?\s?R\$ ?[\d.,]+)/g, "<strong>$1</strong>");
     }
@@ -122,7 +125,6 @@ export class OrderParser {
       return line.replace(/^\s*(Subtotal)\s*$/i, "<strong>$1</strong>");
     }
 
-    // Pagamento
     const paymentStart = indexServiceFee !== -1 ? indexServiceFee : indexSubtotal;
 
     let paymentBlock = [];
@@ -148,7 +150,6 @@ export class OrderParser {
       "O entregador deve cobrar este valor"
     );
 
-    // Notas
     const used = new Set([
       ...timeBlock,
       ...addressBlock,
