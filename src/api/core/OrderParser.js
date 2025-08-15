@@ -16,7 +16,8 @@ export class OrderParser {
         collectOnDelivery: false
       },
       notes: "",
-      sodas: []
+      sodas: [],
+      hasCombo: false
     };
 
     const firstLine = lines[0].split(" ");
@@ -96,7 +97,10 @@ export class OrderParser {
       "agua",
       "água",
       "Kuat 2l",
-      "Coca-Cola Lata 350ml",
+      "Coca-Cola Lata 350ml"
+    ];
+
+    const comboKeys = [
       "Combo 10 Esfihas + Kuat 2l",
       "Combo 20 Esfihas de Carne + Coca 2l",
       "Pizza Gigante 50cm + Baby Doce 20cm + Coca 2l",
@@ -115,6 +119,7 @@ export class OrderParser {
 
     const sodas = [];
     const items = [];
+    let hasCombo = false;
 
     for (let i = indexItems + 1; i < endItemsIndex; i++) {
       let item = lines[i];
@@ -124,6 +129,20 @@ export class OrderParser {
       const isSoda = sodaKeys.some(
         key => itemWithoutPrice.toLowerCase() === key.toLowerCase()
       );
+
+      let isCombo = false;
+      comboKeys.forEach(key => {
+        if (
+          item.toLowerCase().includes(key.toLowerCase()) ||
+          itemWithoutPrice.toLowerCase().includes(key.toLowerCase())
+        ) {
+          isCombo = true;
+        }
+
+      });
+      if (isCombo) {
+        hasCombo = true;
+      }
 
       if (isSoda) {
         sodas.push(boldMoney(boldTitles(item)));
@@ -139,6 +158,7 @@ export class OrderParser {
 
     order.items = items;
     order.sodas = sodas;
+    order.hasCombo = hasCombo;
 
     function boldMoney(line) {
       return line.replace(/(-?\s?R\$ ?[\d.,]+)/g, "<strong>$1</strong>");
