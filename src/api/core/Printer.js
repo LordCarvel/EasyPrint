@@ -65,10 +65,17 @@ export class Printer {
 
           <div class="section">
             <strong>Itens:</strong><br/>
-            ${order.sodas && order.sodas.length > 0 ? `<div><strong>Refrigerantes:</strong></div>${order.sodas.map(s => `<div class="soda-item" style="margin-bottom:6px; border-bottom: 1px dashed #262627ff; margin-left:10px; font-weight: 700;">- ${s}</div>`).join("")}` : ""}
+            <div style="margin-top:4px;">
+              <strong>Refrigerantes:</strong>
+              ${
+                order.sodas && order.sodas.length > 0
+                  ? order.sodas.map(s => `<div class="soda-item" style="margin-left:10px; font-weight:bold; font-size: 9pt">- ${s}</div>`).join("")
+                  : ""
+              }
+            </div>
             ${order.items.map(i => `<div>- ${i}</div>`).join("")}
           </div>
-
+          
           <div class="section payment">
             <div class="payment-title">Pagamento</div>
             ${paymentHTML}

@@ -15,7 +15,8 @@ export class OrderParser {
         method: "unknown",
         collectOnDelivery: false
       },
-      notes: ""
+      notes: "",
+      sodas: []
     };
 
     const firstLine = lines[0].split(" ");
@@ -45,45 +46,44 @@ export class OrderParser {
     }
     order.timeInfo = timeBlock.join("\n");
 
+    // Endereço e entrega
     let addressBlock = [];
     let deliveryBlock = [];
     let startedAddress = false;
     let afterAddress = false;
+    let addressEndIndex = -1;
 
     for (let i = 0; i < indexItems; i++) {
+      const line = lines[i];
       if (
-        lines[i]?.startsWith("R.") ||
-        lines[i]?.startsWith("Av.") ||
-        lines[i]?.startsWith("Rua") ||
-        lines[i]?.startsWith("Avenida")
-      )
+        line?.startsWith("R.") ||
+        line?.startsWith("Av.") ||
+        line?.startsWith("Rua") ||
+        line?.startsWith("Avenida")
+      ) {
         startedAddress = true;
+        if (addressBlock.length === 0) addressEndIndex = i;
+      }
 
       if (startedAddress && !afterAddress) {
-        addressBlock.push(lines[i]);
-        if (lines[i].toLowerCase().includes("entrega própria")) {
+        addressBlock.push(line);
+        if (line.includes("Entrega própria") || line.includes("Retirada")) {
           afterAddress = true;
+          addressEndIndex = i;
         }
       } else if (afterAddress) {
-        deliveryBlock.push(lines[i]);
+        deliveryBlock.push(line);
       }
     }
 
     order.address = addressBlock.join("\n");
     order.deliveryInfo = deliveryBlock.join("\n");
 
-    const endItemsIndex = indexServiceFee !== -1 ? indexServiceFee : indexSubtotal;
-
-    const highlightKeys = [
-      "Combo 10 Esfihas + Kuat 2l",
+    const sodaKeys = [
       "Coca-Cola 600ml",
       "Refrigerante Coca-Cola Zero Açucar Garrafa 2l",
       "Refrigerante Pepsi 2l",
-      "Combo 20 Esfihas de Carne + Coca 2l",
       "Fanta Laranja 2l",
-      "Pizza Gigante 50cm + Baby Doce 20cm + Coca 2l",
-      "Combo Pizza Família 45cm + Baby Doce 20cm + Kuat 2l",
-      "Combo 20 Esfihas + Kuat 2l",
       "Coca-Cola 2l",
       "Coca Cola Zero Lata 350ml",
       "Fanta Laranja Lata",
@@ -96,21 +96,44 @@ export class OrderParser {
       "agua",
       "água",
       "Kuat 2l",
-      "Coca-Cola Lata 350ml"
+      "Coca-Cola Lata 350ml",
+      "Combo 10 Esfihas + Kuat 2l",
+      "Combo 20 Esfihas de Carne + Coca 2l",
+      "Pizza Gigante 50cm + Baby Doce 20cm + Coca 2l",
+      "Combo Pizza Família 45cm + Baby Doce 20cm + Kuat 2l",
+      "Combo 20 Esfihas + Kuat 2l"
     ];
+
+    let endItemsIndex;
+    if (indexServiceFee !== -1) {
+      endItemsIndex = indexServiceFee;
+    } else if (indexSubtotal !== -1) {
+      endItemsIndex = indexSubtotal;
+    } else {
+      endItemsIndex = lines.length;
+    }
 
     const sodas = [];
     const items = [];
 
     for (let i = indexItems + 1; i < endItemsIndex; i++) {
       let item = lines[i];
-      const found = highlightKeys.find((key) =>
-        item.toLowerCase().includes(key.toLowerCase())
+      const itemWithoutTags = item.replace(/<[^>]+>/g, '');
+      const itemWithoutPrice = itemWithoutTags.replace(/\s*R\$[\d,.]+$/, "").trim();
+
+      const isSoda = sodaKeys.some(
+        key => itemWithoutPrice.toLowerCase() === key.toLowerCase()
       );
-      if (found) {
-        sodas.push(item);
+
+      if (isSoda) {
+        sodas.push(boldMoney(boldTitles(item)));
       } else {
-        items.push(item);
+        let itemWithBoldSoda = item;
+        sodaKeys.forEach(key => {
+          const regex = new RegExp(`(${key})`, "gi");
+          itemWithBoldSoda = itemWithBoldSoda.replace(regex, "<strong>$1</strong>");
+        });
+        items.push(boldMoney(boldTitles(itemWithBoldSoda)));
       }
     }
 
@@ -154,13 +177,14 @@ export class OrderParser {
       ...timeBlock,
       ...addressBlock,
       ...order.items,
+      ...order.sodas,
       ...paymentBlock,
       lines[0],
       lines[1],
       locatorLine ?? ""
     ]);
-    order.notes = lines.filter((l) => !used.has(l)).join("\n");
+    order.notes = lines.filter((l, idx) => !used.has(l) && idx > addressEndIndex).join("\n");
 
     return order;
   }
-}   
+}
