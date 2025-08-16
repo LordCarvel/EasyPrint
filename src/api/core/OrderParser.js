@@ -82,7 +82,7 @@ export class OrderParser {
 
     const sodaKeys = [
       "Coca-Cola 600ml",
-      "Coca-Cola Zero 600ml",
+      "Coca Cola Zero 600ml",
       "Refrigerante Coca-Cola Zero Açucar Garrafa 2l",
       "Refrigerante Pepsi 2l",
       "Fanta Laranja 2l",
