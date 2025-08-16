@@ -87,6 +87,7 @@ export class OrderParser {
       "Refrigerante Pepsi 2l",
       "Fanta Laranja 2l",
       "Coca-Cola 2l",
+      "Coca 2l",
       "Coca Cola Zero Lata 350ml",
       "Fanta Laranja Lata",
       "Refrigerante Pepsi Lata 350ml",
